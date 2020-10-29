@@ -14,14 +14,16 @@ library(tidyverse)
 ## Zooplankton
 download.file("https://raw.githubusercontent.com/jaseeverett/IMOS_Toolbox/master/Plankton/Output/NRS_Indices.csv", paste0("Data",.Platform$file.sep,"NRS_Indices.csv"))
 
-zdat <- read_csv(paste0("Data",.Platform$file.sep,"NRS_Indices.csv"))
+zdat <- read_csv(paste0("Data",.Platform$file.sep,"NRS_Indices.csv")) %>%
+  filter(Biomass_mgm3 >= 0)
 
 
 gg <- ggplot(data = zdat, mapping = aes(x = SampleDateLocal, y = Biomass_mgm3)) +
   geom_point() +
   geom_smooth(method = "lm") +
-  geom_hline(yintercept = mean(zdat$Biomass_mgm3)) +
-  facet_wrap(facets = vars(Station))
+  geom_hline(yintercept = mean(zdat$Biomass_mgm3), color = "red") +
+  geom_hline(yintercept = median(zdat$Biomass_mgm3), color = "black") +
+  facet_wrap(facets = vars(Station), scales = "free")
 
 
 ### Time Series ###
