@@ -4,6 +4,9 @@
 
 suppressPackageStartupMessages({
   library(lubridate)
+  library(sp)
+  library(maptools)
+  library(patchwork)
   library(tidyverse)
 })
 
@@ -25,10 +28,18 @@ dat <- read_csv("Data/Brett_data_nov2020.csv") %>%
   filter(Genus %in% KeyGenera | Species %in% KeySpp ) %>% # Only keep Genera and species that relate to the toxins for closure information
   mutate(Date = ymd(Date),
          Year = year(Date),
-         Toxin = 'DST',
-         Toxin = replace(Toxin, Genus == 'Pseudo-nitzschia', 'AST'),
-         Toxin = replace(Toxin, Genus == 'Alexandrium', 'PST')) ## relate toxin to the correct species.
+         Mon = month(Date),
+         Toxin = 'DST Producers',
+         Toxin = replace(Toxin, Genus == 'Pseudo-nitzschia', 'AST Producers'),
+         Toxin = replace(Toxin, Genus == 'Alexandrium', 'PST Producers')) ## relate toxin to the correct species.
 
+## work out Temperate East region & South East region
+dat_te <- dat %>% filter(Latitude > -36 & Latitude < -24.5) #14440 records
+dat_se <- dat %>% filter(Latitude > -47.12 & Latitude < -36) #9590 records
+
+## Climatology
+datm_te <- dat_te %>% group_by(Mon, Toxin) %>% summarise(meanAbundance = mean(Abundance, na.rm = TRUE))
+datm_se <- dat_se %>% group_by(Mon, Toxin) %>% summarise(meanAbundance = mean(Abundance, na.rm = TRUE))
 
 ## Bring in closures data
 closures <-
@@ -42,15 +53,60 @@ x11(width = 6, height = 8)
 closuresPlots
 ggsave("Figures/Closures.png", dpi = 400)
 
+text <- data.frame(x=as.Date("2006-01-01"), y = 24000000, lab = "Temperate East",
+                   Toxin = factor('AST Producers', levels = c('AST Producers', 'DST Producers', 'PST Producers')))
 
-abundplots <- ggplot(dat) +
-  geom_line(aes(x = Date, y = Abundance)) +
+abund_te <- ggplot() + geom_rect(data = data.frame(xmin = as.Date(c("2016-01-01")),
+                                                        xmax = as.Date(c("2019-12-31")),
+                                                        ymin = -Inf,
+                                                        ymax = Inf),
+                                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                      fill = "light blue", alpha = 0.5) +
+  geom_line(data = dat_te, aes(x = Date, y = Abundance)) +
+  geom_text(aes(x = x, y = y,  label=lab, group=NULL), data = text) +
   facet_grid(Toxin ~., scales = "free") +
-  scale_x_date(breaks = scales::date_breaks("1 year"), date_labels = '%Y') +
-  labs( x = "Time", y = bquote("Abundance m"^3)) +
-  theme_bw()
+  scale_x_date(breaks = scales::date_breaks("4 years"), date_labels = '%Y-%b') +
+  labs( x = "", y = bquote("Abundance m"^3)) +
+  theme_bw(base_size = 12) + theme(strip.background = element_blank(),
+                     strip.text = element_blank()
+                    )
 
-x11(width = 6, height = 8)
-abundplots
-ggsave("Figures/Abundances.png", dpi = 400)
+climat_te <- ggplot(datm_te) +
+  geom_line(aes(x = Mon, y = meanAbundance)) +
+  geom_smooth(aes(x = Mon, y = meanAbundance)) +
+  facet_grid(Toxin ~., scales = "free") +
+  scale_x_continuous(breaks = seq(1,12,1), labels= c("J","F","M","A","M","J","J","A","S","O","N","D")) +
+  labs( x = "", y = "") +
+  theme_bw(base_size = 12)  + theme(strip.background = element_blank())
+
+text_se <- data.frame(x=as.Date("2006-01-01"), y = 12000000, lab = "South East",
+                   Toxin = factor('AST Producers', levels = c('AST Producers', 'DST Producers', 'PST Producers')))
+
+abund_se <- ggplot() + geom_rect(data = data.frame(xmin = as.Date(c("2016-01-01")),
+                                                   xmax = as.Date(c("2019-12-31")),
+                                                   ymin = -Inf,
+                                                   ymax = Inf),
+                                 aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                                 fill = "light blue", alpha = 0.5) +
+  geom_line(data = dat_se, aes(x = Date, y = Abundance)) +
+  geom_text(aes(x = x, y = y,  label=lab, group=NULL), data = text_se) +
+  facet_grid(Toxin ~., scales = "free") +
+  scale_x_date(breaks = scales::date_breaks("4 years"), date_labels = '%Y-%b') +
+  labs( x = "Time", y = bquote("Abundance m"^3)) +
+  theme_bw(base_size = 12) + theme(strip.background = element_blank(),
+                     strip.text = element_blank()
+  )
+
+climat_se <- ggplot(datm_se) +
+  geom_line(aes(x = Mon, y = meanAbundance)) +
+  geom_smooth(aes(x = Mon, y = meanAbundance)) +
+  facet_grid(Toxin ~., scales = "free") +
+  scale_x_continuous(breaks = seq(1,12,1), labels= c("J","F","M","A","M","J","J","A","S","O","N","D")) +
+  labs( x = "Time", y = "") +
+  theme_bw(base_size = 12)  + theme(strip.background = element_blank())
+
+x11(width = 10, height = 8)
+plot <- (abund_te + climat_te) / (abund_se + climat_se)
+plot
+ggsave("Figures/RegionHABS.png", plot, dpi = 600)
 

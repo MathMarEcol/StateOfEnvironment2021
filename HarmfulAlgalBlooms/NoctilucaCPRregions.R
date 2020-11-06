@@ -32,15 +32,21 @@ CPRts <- cprNoct %>%
   summarise(CellsL = mean(CellsL, na.rm = TRUE)) %>%
   mutate(Date = ymd(paste0(year, '-', mon, '-01')))
 
-CPRNoctTS <- ggplot(data = CPRts, aes(Date, CellsL)) +
-  geom_point() +
-  geom_line() +
-  geom_smooth() +
+CPRNoctTS <- ggplot() +
+  geom_rect(data = data.frame(xmin = as.Date(c("2016-01-01")),
+                              xmax = as.Date(c("2019-12-31")),
+                              ymin = -Inf,
+                              ymax = Inf),
+            aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = "light blue", alpha = 0.5) +
+  geom_point(data = CPRts, aes(Date, CellsL)) +
+  geom_line(data = CPRts, aes(Date, CellsL)) +
+  geom_smooth(data = CPRts, aes(Date, CellsL)) +
   facet_grid(region ~., scales = "free") +
-  scale_x_date(breaks = scales::date_breaks("2 years"), date_labels = '%Y') +
+  scale_x_date(breaks = scales::date_breaks("4 years"), date_labels = '%Y-%b') +
   theme_bw(base_size = 14) +
   labs(x = 'Time', y = bquote("Noctiluca (Cells L"^-1*")")) +
-  geom_text(aes(x = ymd("2007-06-01"), y = Inf, vjust = 2, label=region, group=NULL)) +
+  geom_text(data = CPRts, aes(x = ymd("2007-06-01"), y = Inf, vjust = 2, label=region, group=NULL)) +
   theme(strip.background = element_blank(),strip.text.y = element_blank())
 CPRNoctTS
 
