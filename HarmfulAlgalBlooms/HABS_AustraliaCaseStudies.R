@@ -53,7 +53,3 @@ graphics.off()
 x11(width = 8, height = 6)
 gg
 ggsave("Figures/HABs_CaseStudyMap.png", dpi = 500)
-
-
-
-
