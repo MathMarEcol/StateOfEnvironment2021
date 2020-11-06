@@ -1,9 +1,12 @@
-library(tidyverse)
+
 library(raster)
 library(sf)
 library(rnaturalearth)
 library(patchwork)
 library(lubridate)
+# library(ggrepel)
+library(tidyverse)
+library(ggsflabel) #devtools::install_github("yutannihilation/ggsflabel")
 
 # lonlatCRS <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 # lonlatCRS_no <- 4326
@@ -30,16 +33,16 @@ NRS_sf <- st_as_sf(NRS, coords = c("Longitude", "Latitude"), crs = 4326)
 
 HAB_sf <- read_csv("Data/HAB_Locations.csv", quote = "\"") %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>%
-  mutate(Lab_x = 112,
-         Lab_y = seq(-37, -48, length.out = 12),
-         Label2 = str_c(No, ") ", Location))
+  mutate(Lab_x = 106,
+         Lab_y = seq(-37, -49, length.out = 12),
+         Label2 = str_c(No, ") ",Year,", ", Location, " (", Details,")"))
 
 gg <- ggplot() +
-  geom_sf(data = world, size = 0.05, fill = "grey20") +
+  geom_sf(data = world, size = 0.05, fill = "grey80") +
   # geom_sf(data = NRS_sf, colour = "red") +
   # geom_sf_text(data = NRS_sf, aes(label = Station), colour = "red", nudge_y = -1) +
-  geom_sf(data = HAB_sf, colour = "red", size = 2) +
-  geom_sf_text(data = HAB_sf, aes(label = No), colour = "red", position=position_jitter(width=1.2, height=1.2)) +
+  geom_sf(data = HAB_sf, colour = "blue", size = 1.5) +
+  geom_sf_text_repel(data = HAB_sf, aes(label = No), colour = "black") +
   scale_x_continuous(expand = c(0, 0), limits = c(105, 165)) +
   scale_y_continuous(expand = c(0, 0), limits = c(-50, -5)) +
   theme_bw() +
@@ -50,15 +53,6 @@ graphics.off()
 x11(width = 8, height = 6)
 gg
 ggsave("Figures/HABs_CaseStudyMap.png", dpi = 500)
-
-
-gg <- ggplot() +
-  geom_sf(data = world, size = 0.05, fill = "grey20") +
-  scale_x_continuous(expand = c(0, 0), limits = c(110, 161)) +
-  scale_y_continuous(expand = c(0, 0), limits = c(-45, -10)) +
-
-gg
-
 
 
 
