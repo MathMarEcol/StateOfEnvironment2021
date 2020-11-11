@@ -166,7 +166,7 @@ for (i in 1:length(sites)) {
 }
 
 myplots[[9]] <- myplots[[9]] +
-  ylab(expression(paste("Abundance Abundance log"[10],"(ind. m"^{-3},")"))) +
+  ylab(expression(paste("Zooplankton Abundance log"[10],"(ind. m"^{-3},")"))) +
   theme(axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = 0, vjust = 1))
 
 myplots[[8]] <- myplots[[8]] +
@@ -176,7 +176,7 @@ myplots[[8]] <- myplots[[8]] +
 
 graphics.off()
 fig <- wrap_plots(myplots, ncol = 2, nrow = 7)
-ggsave(paste0('Figures',.Platform$file.sep,'SecondaryProdnTrends.png'), dpi=300)
+ggsave(paste0('Figures',.Platform$file.sep,'SecondaryProdnTrends_NRS.png'), dpi=300)
 
 
 
