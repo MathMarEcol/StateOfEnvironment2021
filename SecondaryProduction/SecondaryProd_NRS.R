@@ -109,7 +109,7 @@ for (i in 1:length(sites)) {
 
   myplots[[counter]] <- gg
   counter <- counter + 1
-  rm(gg)
+  rm(gg, val, mdl, tmdl)
 
 
   ## Do Diversity
@@ -160,7 +160,7 @@ for (i in 1:length(sites)) {
 
   myplots[[counter]] <- gg
   counter <- counter + 1
-  rm(gg)
+  rm(gg, val, mdl, tmdl)
 }
 
 myplots[[9]] <- myplots[[9]] +

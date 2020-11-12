@@ -111,7 +111,7 @@ for (i in 1:length(mb)) {
 
   myplots[[counter]] <- gg
   counter <- counter + 1
-  rm(gg)
+  rm(gg, val, mdl, tmdl)
 
   ## Do Diversity
   mdl <- lm(ShannonCopepodDiversity ~ SampleDateUTC + fHarmonic(HarmDOY, k = 1), data = m_dat)
@@ -160,7 +160,7 @@ for (i in 1:length(mb)) {
   }
   myplots[[counter]] <- gg
   counter <- counter + 1
-  rm(gg)
+  rm(gg, val, mdl, tmdl)
 
 }
 
