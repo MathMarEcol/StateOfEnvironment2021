@@ -31,7 +31,6 @@ dat <- read_csv(out_file) %>%
     HarmDOY = (DOY/365)*2*pi) %>%  # Convert to radians)
   select(SiteCode, DOY, SampleDateLocal, HarmDOY, ZoopAbundance_m3, ShannonCopepodDiversity)
 
-
 ## Plotting
 sites <- c("DAR", "YON", "NSI", "ROT", "PHB", "KAI", "MAI")
 site_names <- c("a) Darwin Harbour","b) Darwin Harbour",
@@ -162,7 +161,6 @@ for (i in 1:length(sites)) {
   myplots[[counter]] <- gg
   counter <- counter + 1
   rm(gg)
-
 }
 
 myplots[[9]] <- myplots[[9]] +
@@ -173,12 +171,9 @@ myplots[[8]] <- myplots[[8]] +
   ylab("Copepod Diversity") +
   theme(axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = 1, vjust = 1))
 
-
 graphics.off()
 fig <- wrap_plots(myplots, ncol = 2, nrow = 7)
 ggsave(paste0('Figures',.Platform$file.sep,'SecondaryProdnTrends_NRS.png'), dpi=300)
 
-
-
-
+saveRDS(myplots,"Figures/gg_NRS.rds")
 

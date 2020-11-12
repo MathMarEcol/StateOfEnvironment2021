@@ -10,7 +10,7 @@ library(tidyverse)
 
 source("fHarmonic.R")
 
-re_down <- 0 # Should we download the files again
+re_down <- 1 # Should we download the files again
 pt_size <- 1
 t_size <- 3
 
@@ -43,8 +43,7 @@ mb_names <- c("a) North Bioregion","b) North Bioregion",
               "e) North-west Bioregion", "f) North-west Bioregion",
               "g) Temperate East Bioregion","h) Temperate East Bioregion",
               "i) South-west Bioregion", "j) South-west Bioregion",
-              "k) South-eastBioregion", "l) South-eastBioregion")
-
+              "k) South-east Bioregion", "l) South-east Bioregion")
 
 myplots <- list() # Initialise plot list
 Div_slope <- NULL
@@ -110,11 +109,9 @@ for (i in 1:length(mb)) {
                    expand = c(0,0))
   }
 
-
   myplots[[counter]] <- gg
   counter <- counter + 1
   rm(gg)
-
 
   ## Do Diversity
   mdl <- lm(ShannonCopepodDiversity ~ SampleDateUTC + fHarmonic(HarmDOY, k = 1), data = m_dat)
@@ -161,7 +158,6 @@ for (i in 1:length(mb)) {
                    limits = c(as.Date("2008-12-1"), as.Date("2020-06-30")),
                    expand = c(0,0))
   }
-
   myplots[[counter]] <- gg
   counter <- counter + 1
   rm(gg)
@@ -176,18 +172,8 @@ myplots[[8]] <- myplots[[8]] +
   ylab("Copepod Diversity") +
   theme(axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = 1, vjust = 1))
 
-
 graphics.off()
-fig <- wrap_plots(myplots, ncol = 2, nrow = 7)
+fig <- wrap_plots(myplots, ncol = 2, nrow = 6)
 ggsave(paste0('Figures',.Platform$file.sep,'SecondaryProdnTrends_CPR.png'), dpi=300)
 
-
-
-
-
-
-
-
-
-
-
+saveRDS(myplots,"Figures/gg_CPR.rds")
