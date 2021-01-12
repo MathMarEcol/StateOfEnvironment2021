@@ -1,7 +1,7 @@
 # Code to plot trends in the Integrated Marine Observing System (IMOS) NRS data for SOE2021
 #
 # Jason Everett (UQ/CSIRO/UNSW)
-# Last Updated: 10th November 2020
+# Last Updated: 11th January 2021
 
 library(lubridate)
 library(tidymodels)
@@ -82,14 +82,15 @@ if (re_down==TRUE){
 dat <- read_csv(out_file)
 
 min_val <- min(dat$ZoopAbundance_m3[dat$ZoopAbundance_m3>0], na.rm = TRUE) / 2 # Half min value
+min_val2 <- min(dat$Biomass_mgCarbon_m3[dat$Biomass_mgCarbon_m3>0], na.rm = TRUE) / 2 # Half min value
 
 dat <- dat %>%
   mutate(ZoopAbundance_m3 = log10(ZoopAbundance_m3 + min_val),
+         Biomass_mgCarbon_m3 = log10(Biomass_mgCarbon_m3 + min_val2),
          DOY = yday(SampleDateUTC),
          SampleDateUTC = date(SampleDateUTC),
          HarmDOY = (DOY/365)*2*pi) %>%  # Convert to radians
-  rename(ShannonCopepodDiversity = ShannonCopepodDiversityCPR) %>%
-  dplyr::select(Route, Region, Longitude, Latitude, BioRegion, DOY, SampleDateUTC, HarmDOY, ZoopAbundance_m3, ShannonCopepodDiversity)
+  dplyr::select(Route, Region, Longitude, Latitude, BioRegion, DOY, SampleDateUTC, HarmDOY, ZoopAbundance_m3, Biomass_mgCarbon_m3)
 
 counter <- 1
 myplots <- list()
@@ -124,7 +125,7 @@ for (i in 1:length(mb)){
   temp <- dat %>%
     filter(BioRegion == mb[i])
 
-  myplots[[counter]] <- fTrendAnalysis(temp, "ZoopAbundance_m3", "SampleDateUTC", "HarmDOY") +
+  myplots[[counter]] <- fTrendAnalysis(temp, "Biomass_mgCarbon_m3", "SampleDateUTC", "HarmDOY") +
     scale_y_continuous(expand = expansion(mult = 0.2), position = "right") +
     annotate("text", x = ymd("2008-12-15"), y = Inf, label = mb_names[counter], hjust = 0, vjust = 1.2, size = t_size)
 
@@ -135,14 +136,14 @@ for (i in 1:length(mb)){
                    date_labels = "%Y",
                    date_breaks = "2 years",
                    date_minor_breaks = "years",
-                   limits = c(as.Date("2008-12-1"), as.Date("2020-09-30")),
+                   limits = c(as.Date("2011-12-1"), as.Date("2020-09-30")),
                    expand = c(0,0))
   } else {
     myplots[[counter]] <- myplots[[counter]] +
       scale_x_date(labels = NULL,
                    date_breaks = "2 years",
                    date_minor_breaks = "years",
-                   limits = c(as.Date("2008-12-1"), as.Date("2020-06-30")),
+                   limits = c(as.Date("2011-12-1"), as.Date("2020-06-30")),
                    expand = c(0,0))
   }
 
@@ -158,13 +159,13 @@ myplots[[7]] <- myplots[[7]] +
   theme(axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = 0, vjust = 1))
 
 myplots[[10]] <- myplots[[10]] +
-  ylab(expression(paste("Zooplankton Abundance log"[10],"(ind. m"^{-3},")"))) +
+  ylab(expression(paste("Zooplankton Biomass log"[10],"(mg C m"^{-3},")"))) +
   theme(axis.title.y = element_text(color = "black", hjust = 1.35, size = 12))
 
 
 graphics.off()
 fig <- wrap_plots(myplots, ncol = 2, nrow = 6)
-ggsave(paste0('Figures',.Platform$file.sep,'WaterColumnAssess_Offshore.png'), dpi=300)
+ggsave(paste0('Figures',.Platform$file.sep,'WaterColumnAssess_OffshoreBiomass.png'), dpi=300)
 
 saveRDS(myplots,"Figures/gg_Offshore.rds")
 
