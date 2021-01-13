@@ -11,14 +11,14 @@ library(tidyverse)
 source("fHarmonic.R")
 source("../../PlanktonTrendAnalysis/PlanktonTrends_HelpR.R")
 
-re_down <- 0 # Should we download the files again
+re_down <- FALSE # Should we download the files again
 pt_size <- 1
 t_size <- 3
 
 file = "https://raw.githubusercontent.com/jaseeverett/IMOS_Toolbox/master/Plankton/Output/NRS_Indices.csv"
 out_file = paste0('Data',.Platform$file.sep,'NRS_Indices.csv')
 
-if (re_down==1){
+if (re_down==TRUE){
   download.file(file, out_file, method = "auto", quiet=FALSE)
 }
 
@@ -127,7 +127,7 @@ for (i in 1:length(sites)) {
 
 
   myplots[[counter]] <- fTrendAnalysis(m_dat, "Biomass_mgm3", "SampleDateLocal", "HarmDOY") +
-    scale_y_continuous(expand = expansion(mult = 0.2), position = "right") +
+    scale_y_continuous(expand = expansion(mult = 0.2), position = "left") +
     annotate("text", x = ymd("2008-12-15"), y = Inf, label = site_names[counter], hjust = 0, vjust = 1.2, size = t_size)
 
 
@@ -152,13 +152,12 @@ for (i in 1:length(sites)) {
   rm(temp)
 
 
-
   lf2 <- lf %>%
     filter(SiteCode==sites[i])
 
   if (dim(lf2)[1] > 0){
     myplots[[counter]] <- fTrendAnalysis(lf2, "LFAbund", "Date", "HarmDOY") +
-      scale_y_continuous(expand = expansion(mult = 0.2), position = "right") +
+      scale_y_continuous(expand = expansion(mult = 0.2), position = "left") +
       annotate("text", x = ymd("2013-12-15"), y = Inf, label = site_names[counter], hjust = 0, vjust = 1.2, size = t_size)
   } else {
     myplots[[counter]] <- ggplot() + geom_blank() + theme_minimal()
@@ -174,7 +173,7 @@ for (i in 1:length(sites)) {
                    expand = c(0,0))
   }
 
-  if (i >= 3) {
+  if (i >= 3 & i <= 6) {
     myplots[[counter]] <- myplots[[counter]] +
       scale_x_date(labels = NULL,
                    date_breaks = "2 years",
@@ -189,14 +188,18 @@ for (i in 1:length(sites)) {
 
 }
 
-#
-# myplots[[9]] <- myplots[[9]] +
-#   ylab(expression(paste("Chlorophyll "*italic(a)," Biomass (mg m"^{-3},")"))) +
-#   theme(axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = 0, vjust = 1))
-#
-# myplots[[10]] <- myplots[[10]] +
-#   ylab(expression(paste("Zooplankton Biomass log"[10],"(mg m"^{-3},")"))) +
-#   theme(axis.title.y = element_text(color = "black", hjust = 1, size = 12))
+myplots[[1]] <- myplots[[1]] +
+  ggtitle(expression(paste("Chlorophyll "*italic(a)," Biomass\nlog"[10],"(mg m"^{-3},")"))) +
+  theme(title = element_text(color = "black", size = 8, face = "bold"))
+
+myplots[[2]] <- myplots[[2]] +
+  ggtitle(expression(paste("Zooplankton Biomass\nlog"[10],"(mg m"^{-3},")"))) +
+  theme(title = element_text(color = "black", size = 8, face = "bold"))
+
+myplots[[3]] <- myplots[[3]] +
+  ggtitle(expression(paste("Larval Fish Abundance\nlog"[10],"(ind. m"^{-3},")"))) +
+  theme(title = element_text(color = "black", size = 8, face = "bold"))
+
 
 graphics.off()
 fig <- wrap_plots(myplots, ncol = 3, nrow = 7, clip = FALSE)
