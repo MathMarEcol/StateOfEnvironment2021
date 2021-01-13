@@ -38,15 +38,12 @@ dat <- dat %>%
 
 ## Now do larval fish
 
-KAI <- read_csv("Data/KAI.csv")
-MAI <- read_csv("Data/MAI.csv")
-NSI <- read_csv("Data/NSI.csv")
-PHB <- read_csv("Data/PHB.csv")
-ROT <- read_csv("Data/ROT.csv")
-
-lf <- bind_rows(KAI, MAI, NSI, PHB, ROT) %>%
+lf <- read_csv("Data/KAI.csv") %>%
+  bind_rows(read_csv("Data/MAI.csv"), read_csv("Data/NSI.csv"), read_csv("Data/PHB.csv"), read_csv("Data/ROT.csv")) %>%
   mutate(LFAbund = rowSums(select(., "Acanthuridae_37437000":"Phycidae_Gadiopsurus.spp._37226000"), na.rm = TRUE)/Volume_m3) %>%
   select(-c("Acanthuridae_37437000":"Phycidae_Gadiopsurus.spp._37226000")) %>%
+  filter(Volume_m3 > 100) %>%
+  # filter(str_match_all(Comments,"Sample missing")==FALSE) %>%
   mutate(Date = dmy(Date),
          DOY = yday(Date),
          HarmDOY = (DOY/365)*2*pi,  # Convert to radians)
@@ -78,8 +75,6 @@ for (i in 1:length(sites)) {
   ref_date = dmy('01-1-2009')
   data_length <- as.numeric(difftime(m_dat$SampleDateLocal[length(m_dat$SampleDateLocal)], m_dat$SampleDateLocal[1]))
   decade_length <- as.numeric(difftime(dmy("01-01-2020"), ref_date))
-
-
 
   ## Do Phytoplankton
   mdl <- lm(Chla_mgm3 ~ SampleDateLocal + fHarmonic(HarmDOY, k = 1), data = m_dat)
