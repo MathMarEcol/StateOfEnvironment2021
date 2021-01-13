@@ -189,16 +189,22 @@ for (i in 1:length(sites)) {
 }
 
 myplots[[1]] <- myplots[[1]] +
-  ggtitle(expression(paste("Chlorophyll "*italic(a)," Biomass\nlog"[10],"(mg m"^{-3},")"))) +
-  theme(title = element_text(color = "black", size = 8, face = "bold"))
+  labs(title = expression(paste("Chlorophyll "*italic(a)," Biomass")),
+          subtitle = expression(paste("log"[10],"(mg m"^{-3},")"))) +
+  theme(plot.title = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = -1),
+        plot.subtitle = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = 2))
 
 myplots[[2]] <- myplots[[2]] +
-  ggtitle(expression(paste("Zooplankton Biomass\nlog"[10],"(mg m"^{-3},")"))) +
-  theme(title = element_text(color = "black", size = 8, face = "bold"))
+  labs(title = expression(paste("Zooplankton Biomass")),
+       subtitle = expression(paste("log"[10],"(mg m"^{-3},")"))) +
+  theme(plot.title = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = -1),
+        plot.subtitle = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = 2))
 
 myplots[[3]] <- myplots[[3]] +
-  ggtitle(expression(paste("Larval Fish Abundance\nlog"[10],"(ind. m"^{-3},")"))) +
-  theme(title = element_text(color = "black", size = 8, face = "bold"))
+  labs(title = expression(paste("Larval Fish Abundance")),
+       subtitle = expression(paste("log"[10],"(ind. m"^{-3},")"))) +
+  theme(plot.title = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = -1),
+        plot.subtitle = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = 2))
 
 
 graphics.off()
