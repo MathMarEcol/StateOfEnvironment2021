@@ -8,8 +8,7 @@ library(tidymodels)
 library(patchwork)
 library(tidyverse)
 
-source("fHarmonic.R")
-source("../../PlanktonTrendAnalysis/PlanktonTrends_HelpR.R")
+source("WaterColumnAssess_HelpR.R")
 
 re_down <- FALSE # Should we download the files again
 pt_size <- 1
@@ -26,14 +25,16 @@ if (re_down==TRUE){
 dat <- read_csv(out_file)
 min_val <- min(dat$ZoopAbundance_m3[dat$ZoopAbundance_m3>0], na.rm = TRUE) / 2 # Half min value
 min_val2 <- min(dat$Biomass_mgm3[dat$Biomass_mgm3>0], na.rm = TRUE) / 2 # Half min value
+min_val3 <- min(dat$Chla_mgm3[dat$Chla_mgm3>0], na.rm = TRUE) / 2 # Half min value
 
 dat <- dat %>%
   mutate(ZoopAbundance_m3 = log10(ZoopAbundance_m3 + min_val),
          Biomass_mgm3 = log10(Biomass_mgm3 + min_val2),
-    SiteCode = str_sub(NRScode,1, 3),
-    DOY = yday(SampleDateLocal),
-    SampleDateLocal = date(SampleDateLocal),
-    HarmDOY = (DOY/365)*2*pi) %>%  # Convert to radians)
+         Chla_mgm3 = log10(Chla_mgm3 + min_val3),
+         SiteCode = str_sub(NRScode,1, 3),
+         DOY = yday(SampleDateLocal),
+         SampleDateLocal = date(SampleDateLocal),
+         HarmDOY = (DOY/365)*2*pi) %>%  # Convert to radians)
   select(SiteCode, DOY, SampleDateLocal, HarmDOY, Biomass_mgm3, Chla_mgm3)
 
 ## Now do larval fish
@@ -48,6 +49,9 @@ lf <- read_csv("Data/KAI.csv") %>%
          DOY = yday(Date),
          HarmDOY = (DOY/365)*2*pi,  # Convert to radians)
          SiteCode = str_sub(Sample,1,3)) # Get site code
+
+lf_min_val <- min(lf$LFAbund[lf$LFAbund>0], na.rm = TRUE) / 2 # Half min value
+lf$LFAbund <- log10(lf$LFAbund + lf_min_val)
 
 
 ## Plotting
@@ -185,7 +189,7 @@ for (i in 1:length(sites)) {
 
 myplots[[1]] <- myplots[[1]] +
   labs(title = expression(paste("Chlorophyll "*italic(a)," Biomass")),
-          subtitle = expression(paste("log"[10],"(mg m"^{-3},")"))) +
+       subtitle = expression(paste("log"[10],"(mg m"^{-3},")"))) +
   theme(plot.title = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = -1),
         plot.subtitle = element_text(color = "black", size = 8, face = "bold", hjust = 0.5, vjust = 2))
 
