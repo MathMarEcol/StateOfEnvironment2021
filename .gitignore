@@ -2,6 +2,9 @@
 .Rhistory
 .Rapp.history
 
+# netcdf files
+.nc
+
 # Session Data files
 .RData
 
