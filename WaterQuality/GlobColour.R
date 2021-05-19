@@ -1,9 +1,7 @@
 ## download files from globcolour ftp request
 
-#url<- "ftp://ftp.hermes.acri.fr/400385808/" # MODIS 2016 - 2020 for ZSD
-#url <- "ftp://ftp.hermes.acri.fr/576122810/" # AVVIR
-#url <- "ftp://ftp.hermes.acri.fr/968836016/" # MODIS 2011 - 2015 for ZSD
-url <- "ftp://ftp.hermes.acri.fr/348532863/" # MODIS 2015 - 2020 for TSS
+#url<- "ftp://ftp.hermes.acri.fr/374557225/" # MODIS 2011 - 2020 for ZSD
+url <- "ftp://ftp.hermes.acri.fr/967413973/" # MODIS 2011 - 2015 for ZSD
 userpwd <- "ftp_hermes:hermes%"
 destination <- "~/Documents"
 filenames <- getURL(url, userpwd="ftp_hermes:hermes%", 
@@ -24,10 +22,36 @@ source("functions.R")
 zsdStack <- fStackSecchi() # for Secchi
 TSSStack <- fStackTSS() # for TSS
 
-bioregionTrend(zsdStack, bioregion)
-bioregionTrend(TSSStack, bioregion)
+bioregion <- readOGR("C:/Users/dav649/Documents/GitHub/PlanktonTrendAnalysis/marine_regions_2012/shape")
+mb <- c("North", "Temperate East", "North-west", "South-west", "South-east", "Coral Sea")
 
+bioCS <- readRDS("C:/Users/dav649/Documents/GitHub/PlanktonTrendAnalysis/output/Bioregion_Sat.rds")
 
+myplots_chl <- list()
+for (i in 1:length(mb)){
+  
+  temp <- bioCS %>% 
+    filter(Bioregion == mb[i])
+  myplots_chl[[i]] <- fTrendAnalysis(temp, "logMeanChl", "Date", "HarmDOY")
+  myplots_chl[[i]] <- myplots_chl[[i]] + labs(subtitle = mb[i]) + theme(plot.subtitle = element_text(size=8))
+}
+
+bioregionTrend(zsdStack, "Secchi", bioregion)
+bioregionTrend(TSSStack, "TSS", bioregion)
+
+Fig1 <- myplots_Secchi[[3]] + ggtitle('Secchi (m)') + theme(plot.title = element_text(size=10)) + 
+  myplots_TSS[[3]] + ggtitle(expression(paste('TSS (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
+  myplots_chl[[3]] + ggtitle(expression(paste('log'[10],' Chlorophyll (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
+  myplots_Secchi[[1]] + myplots_TSS[[1]] + myplots_chl[[1]] +
+  myplots_Secchi[[6]] + myplots_TSS[[6]] + myplots_chl[[6]] +
+  myplots_Secchi[[2]] + myplots_TSS[[2]] + myplots_chl[[2]] +
+  myplots_Secchi[[5]] + myplots_TSS[[5]] + myplots_chl[[5]] + 
+  myplots_Secchi[[4]] + myplots_TSS[[4]] + myplots_chl[[4]] +
+  plot_layout(ncol = 3) 
+Fig1
+ggsave("Figure1.png", Fig1)
+
+expression(paste("log"[10],"(mg m"^{-3},")"))
 ### SECCHI
 ## create 5 year mean for previous years
 fileyearAll <- list.files("~/", "L3m_")

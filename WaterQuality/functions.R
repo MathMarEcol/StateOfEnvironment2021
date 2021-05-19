@@ -69,14 +69,16 @@ plotParam <-  function(data, parameter, start, end){
 
 #Stack GlobColour data
 fStackTSS <- function(){
-  rlist <- as.list(sort(list.files("C:/Users/dav649/Documents/GitHub/StateOfEnvironment2021/WaterQuality/GlobCol", "OLA_TSM", full.names = TRUE)))
+  rlist <- as.list(sort(list.files("C:/Users/dav649/Documents/GitHub/StateOfEnvironment2021/WaterQuality", "OLA_TSM", full.names = TRUE)))
   TSSStack <- stack(rlist)
   names(TSSStack) <- seq(ymd('2016-04-01'), ymd('2020-12-01'), by = 'months')
+  return(TSSStack)
 }
 fStackSecchi <- function(){
-  rlist <- as.list(sort(list.files("C:/Users/dav649/Documents/GitHub/StateOfEnvironment2021/WaterQuality/GlobCol", "MOD_ZSD", full.names = TRUE)))
-  zsdtack <- stack(rlist)
+  rlist <- as.list(sort(list.files("C:/Users/dav649/Documents/GitHub/StateOfEnvironment2021/WaterQuality", "MOD_ZSD", full.names = TRUE)))
+  zsdStack <- stack(rlist)
   names(zsdStack) <- seq(ymd('2011-01-01'), ymd('2020-12-01'), by = 'months')
+  return(zsdStack)
 }
 
 # function for model
@@ -123,7 +125,7 @@ fTrendAnalysis <- function(dat, y, time, season){
   return(gg)
 }
 
-bioregionTrend <- function(Stack, bioregion) {
+bioregionTrend <- function(Stack, parameter, bioregion) {
       mb <- c("North", "Temperate East", "North-west", "South-west", "South-east", "Coral Sea")
       
       sat <- tibble(Bioregion = character(), MeanVar = vector(), Date = date())
@@ -152,13 +154,13 @@ bioregionTrend <- function(Stack, bioregion) {
       temp <- sat %>% 
         filter(Bioregion == mb[i])
       myplots[[i]] <- fTrendAnalysis(temp, "MeanVar", "Date", "HarmDOY")
-      myplots[[i]] <- myplots[[i]] + ggtitle(mb[i]) + theme(plot.title = element_text(size=8))
+      myplots[[i]] <- myplots[[i]] + labs(subtitle = mb[i]) + theme(plot.subtitle = element_text(size=8))
     }
     
-    Year = year(start)
+    name <- paste(parameter)
     
     funclist <- list("myplots" = myplots)
-    names(funclist) <- paste("myplots_", parameter, sep = '')
+    names(funclist) <- paste("myplots_", name, sep = '')
     list2env(funclist, .GlobalEnv)
     
 }
