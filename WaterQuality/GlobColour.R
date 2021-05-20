@@ -39,6 +39,7 @@ for (i in 1:length(mb)){
 bioregionTrend(zsdStack, "Secchi", bioregion)
 bioregionTrend(TSSStack, "TSS", bioregion)
 
+x11(width = 8, height = 10)
 Fig1 <- myplots_Secchi[[3]] + ggtitle('Secchi (m)') + theme(plot.title = element_text(size=10)) + 
   myplots_TSS[[3]] + ggtitle(expression(paste('TSS (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
   myplots_chl[[3]] + ggtitle(expression(paste('log'[10],' Chlorophyll (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
@@ -49,9 +50,9 @@ Fig1 <- myplots_Secchi[[3]] + ggtitle('Secchi (m)') + theme(plot.title = element
   myplots_Secchi[[4]] + myplots_TSS[[4]] + myplots_chl[[4]] +
   plot_layout(ncol = 3) 
 Fig1
-ggsave("Figure1.png", Fig1)
+ggsave("Figures/Figure1.png", Fig1)
 
-expression(paste("log"[10],"(mg m"^{-3},")"))
+
 ### SECCHI
 ## create 5 year mean for previous years
 fileyearAll <- list.files("~/", "L3m_")

@@ -3,7 +3,7 @@
 ## by Claire Davies
 ## Date created: 8-04-2021
 
-TSS <- read_csv("https://raw.githubusercontent.com/PlanktonTeam/IMOS_Toolbox/master/Plankton/RawData/NRS_TSS.csv", na = c("(null)", NaN)) %>% 
+TSS <- read_csv("https://raw.githubusercontent.com/PlanktonTeam/IMOS_Toolbox/master/Plankton/RawData/BGC_TSS.csv", na = c("(null)", NaN)) %>% 
   rename(TripCode = TRIP_CODE, SampleDepth_m = SAMPLEDEPTH_M, TSS_mgL = TSS_MGL, Secchi_m = SECCHIDEPTH_M) %>%
   mutate(Station = substr(TripCode, 4, 6),
          Station = factor(Station, levels = c("DAR","YON","NSI","PHB","ROT","MAI")),
@@ -12,6 +12,16 @@ TSS <- read_csv("https://raw.githubusercontent.com/PlanktonTeam/IMOS_Toolbox/mas
          Month = month(Date), 
          MonR = Month/12 * 2 * base::pi) %>%
   filter(!is.na(Station))
+
+ChlRot <-  read_csv("https://raw.githubusercontent.com/PlanktonTeam/IMOS_Toolbox/master/Plankton/RawData/BGC_Pigments.csv", na = c("(null)", NaN)) %>% 
+  rename(TripCode = TRIP_CODE, SampleDepth_m = SAMPLEDEPTH_M, Chla = DV_CPHL_A_AND_CPHL_A) %>%
+  filter(grepl('ROT', TripCode)) %>%
+  mutate(Date = ymd(paste0(substr(TripCode, 4, 7),"-",substr(TripCode, 8, 9),"-",substr(TripCode, 10, 11))), 
+         Year = year(Date),
+         Month = month(Date), 
+         MonR = Month/12 * 2 * base::pi) %>%
+  group_by(Date, Year, MonR) %>% summarise(Chla = mean(Chla, na.rm = TRUE),
+                               .groups = 'drop') 
 
 Sec2016 <- TSS #%>% filter(Station != 'KAI') %>% droplevels() #%>% filter(Year < 2017)
 Sec2020 <- TSS %>% filter(Year > 2015) #%>% filter(Station != 'KAI') %>% droplevels() 
@@ -57,3 +67,22 @@ TSSplot <- myplots_TSS_mgL[[1]] + myplots_TSS_mgL[[6]] + myplots_TSS_mgL[[2]] + 
 TSSplot
 ggsave("TSS_ts_bio.png", TSSplot)
 
+
+### For Rottnest only
+SecRot <- TSS %>% filter(Station == 'ROT')
+TSSRot <- TSSmean %>% filter(TSS_mgL < factor & TSS_mgL > 0 & TSSFLAG %in% c(0,1) & Station == 'ROT') %>% group_by(Date, Year, MonR, Station) %>% 
+  summarise(TSS_mgL = mean(TSS_mgL, na.rm = TRUE), .groups = "drop") %>% 
+  drop_na(TSS_mgL) 
+
+plotParamRot(SecRot, "Secchi_m", ymd("2009-01-01"), ymd("2020-12-31"))
+plotParamRot(TSSRot, "TSS_mgL", ymd("2009-01-01"), ymd("2020-12-31"))
+plotParamRot(ChlRot, "Chla", ymd("2009-01-01"), ymd("2020-12-31"))
+
+#x11()
+Fig2 <- RotPlotSecchi_m[[1]] + ggtitle('Secchi (m)') + theme(plot.title = element_text(size=10)) + 
+        RotPlotTSS_mgL[[1]] + ggtitle(expression(paste('TSS (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
+        RotPlotChla[[1]] + ggtitle(expression(paste('log'[10],' Chlorophyll (mg m'^{-3},')'))) + theme(plot.title = element_text(size=10)) + 
+        RotPlotSecchi_m[[2]] + RotPlotTSS_mgL[[2]] + RotPlotChla[[2]] + 
+        myplots_Secchi[[4]] + myplots_TSS[[4]] + myplots_chl[[4]]
+Fig2
+ggsave("Figures/Figure2.png", Fig2)
